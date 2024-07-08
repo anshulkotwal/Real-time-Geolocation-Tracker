@@ -24,7 +24,7 @@ This project is a real-time geolocation tracker built with Node.js, Express, Soc
 
 1. **Clone the repository**:
 
-    git clone https://github.com/anshulkotwal/geolocation-tracker.git
+    git clone https://github.com/anshulkotwal/Real-time-Geolocation-Tracker
     cd geolocation-tracker
 
 2. **Install dependencies**:
