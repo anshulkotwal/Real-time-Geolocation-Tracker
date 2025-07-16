@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Advanced Real-Time Tracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+        integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="radar-container">
+                <div class="radar-sweep"></div>
+                <div class="radar-dot"></div>
+            </div>
+            <h2>Initializing Tracking System...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div id="main-interface" style="display: none;">
+        <!-- Top HUD -->
+        <div id="top-hud">
+            <div class="hud-section">
+                <div class="status-indicator">
+                    <div class="pulse-dot"></div>
+                    <span id="connection-status">CONNECTING...</span>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-user"></i>
+                    <span id="current-user">Anonymous</span>
+                </div>
+            </div>
+            <div class="hud-center">
+                <h1><i class="fas fa-satellite"></i> ADVANCED TRACKER</h1>
+            </div>
+            <div class="hud-section">
+                <div class="coordinates">
+                    <div>LAT: <span id="user-lat">0.000000</span></div>
+                    <div>LNG: <span id="user-lng">0.000000</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div id="side-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-users"></i> ACTIVE USERS</h3>
+                <div class="user-count">
+                    <span id="users-online">0</span>
+                </div>
+            </div>
+            
+            <div id="users-list"></div>
+            
+            <div class="panel-section">
+                <h4><i class="fas fa-tachometer-alt"></i> TELEMETRY</h4>
+                <div class="telemetry-data">
+                    <div class="data-item">
+                        <span>Speed:</span>
+                        <span id="current-speed">0.0 km/h</span>
+                    </div>
+                    <div class="data-item">
+                        <span>Heading:</span>
+                        <span id="current-heading">0°</span>
+                    </div>
+                    <div class="data-item">
+                        <span>Accuracy:</span>
+                        <span id="current-accuracy">0m</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4><i class="fas fa-comments"></i> CHAT</h4>
+                <div id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Type message...">
+                    <button id="send-message"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+            
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <button id="center-map" class="control-btn">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button id="toggle-3d" class="control-btn">
+                    <i class="fas fa-cube"></i>
+                </button>
+                <button id="toggle-satellite" class="control-btn">
+                    <i class="fas fa-satellite-dish"></i>
+                </button>
+            </div>
+
+            <!-- Compass -->
+            <div id="compass">
+                <div class="compass-face">
+                    <div class="compass-needle" id="compass-needle"></div>
+                    <div class="compass-directions">
+                        <div class="direction n">N</div>
+                        <div class="direction e">E</div>
+                        <div class="direction s">S</div>
+                        <div class="direction w">W</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom HUD -->
+        <div id="bottom-hud">
+            <div class="hud-section">
+                <div class="nearest-user">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="nearest-info">No other users</span>
+                </div>
+            </div>
+            <div class="hud-center">
+                <div class="zoom-controls">
+                    <span>Zoom: <span id="zoom-level">16</span></span>
+                </div>
+            </div>
+            <div class="hud-section">
+                <div class="time-display">
+                    <i class="fas fa-clock"></i>
+                    <span id="current-time"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distance Modal -->
+    <div id="distance-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Navigation Details</h3>
+            <div id="navigation-details"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/script.js"></script>
+</body>
+</html>
